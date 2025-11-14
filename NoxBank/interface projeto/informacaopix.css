@@ -1,0 +1,160 @@
+body {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: #ffffff;
+}
+
+/* CONTAINER PRINCIPAL */
+.dados-do-pix {
+  width: 393px;
+  height: 852px;
+  background-color: #1b1c20;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow-y: auto;
+}
+
+/* === CABEÇALHO === */
+.transaction-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transaction-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* garante que tudo fique alinhado à esquerda */
+  gap: 10px;
+}
+
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.transaction-summary {
+  margin-top: 35px; /* dá espaço abaixo da seta */
+}
+
+}
+
+.transaction-summary h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.valor {
+  margin: 5px 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.transaction-summary time {
+  color: #a5a5a5;
+  font-size: 13px;
+}
+
+.transaction-type {
+  margin-top: 3px;
+  font-size: 13px;
+  color: #a5a5a5;
+}
+
+.transaction-type .PIX {
+  background-color: #b0255a;
+  padding: 1px 6px;
+  border-radius: 5px;
+  color: white;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+/* === BOTÕES DE AÇÃO === */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+  gap: 10px;
+}
+
+.action-button {
+  background-color: #2a2b2f;
+  border: none;
+  border-radius: 15px;
+  flex: 1;
+  padding: 15px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.action-button:hover {
+  background-color: #343539;
+}
+
+.action-button img {
+  width: 45px;
+  height: 45px;
+  margin-bottom: 5px;
+}
+
+.action-button span {
+  font-size: 13px;
+}
+
+/* === DETALHES DA TRANSAÇÃO === */
+.transaction-details {
+  margin-top: 30px;
+}
+
+.detail-item {
+  margin-bottom: 10px;
+}
+
+.detail-item span {
+  display: block;
+  font-size: 13px;
+  color: #b0b0b0;
+}
+
+.detail-item p {
+  margin: 4px 0 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+}
+
+/* === LINHAS DIVISÓRIAS === */
+.linha {
+  height: 1px;
+  background-color: #333;
+  margin: 10px 0;
+}
+
+/* === SCROLLBAR INVISÍVEL === */
+.dados-do-pix::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+
+

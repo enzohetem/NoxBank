@@ -1,0 +1,163 @@
+body {
+  background-color: white;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+.modelo-iphone {
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(48, 49, 56, 0.87) 0%,
+    rgba(27, 28, 32, 0.87) 100%
+  );
+  width: 393px;
+  height: 852px;
+  border-radius: 20px;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+}
+/* -------- area de login -------- */
+.preencher-login,
+.preencher-senha {
+  position: absolute;
+  left: 45px;
+  width: 299px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.preencher-login {
+  top: 396px;
+}
+.preencher-senha {
+  top: 458px;
+}
+.input-login,
+.input-senha {
+  border: none;
+  outline: none;
+  font-family: "Inter-Regular", Helvetica;
+  font-size: 20px;
+  color: #000;
+  flex: 1;
+  margin-left: 10px;
+  background: transparent;
+}
+.input-login::placeholder,
+.input-senha::placeholder {
+  color: #0000009c;
+  opacity: 0.5;
+}
+/* ÍCONES */
+.image {
+  width: 27px;
+  height: 27px;
+  margin-right: 10px;
+}
+.sem {
+  width: 27px;
+  height: 18px;
+  margin-right: 10px;
+}
+/* LOGO E ÍCONES SUPERIORES */
+.logo-banco {
+  position: absolute;
+  top: 238px;
+  left: 46px;
+  width: 277px;
+  height: 134px;
+  object-fit: cover;
+}
+.informacao {
+  position: absolute;
+  top: 49px;
+  left: 300px;
+  width: 51px;
+  height: 51px !important;
+  object-fit: cover;
+}
+.suporte {
+  position: absolute;
+  top: 44px;
+  left: 41px;
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+}
+/* BOTÃO ACESSAR */
+.ACESSAR {
+  position: absolute;
+  top: 525px;
+  left: 46px;
+  width: 300px;
+  height: 53px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(
+    90deg,
+    rgba(159, 17, 70, 1) 0%,
+    rgba(186, 32, 91, 1) 100%
+  );
+  transition: opacity 0.3s;
+}
+.ACESSAR:hover {
+  opacity: 0.9;
+}
+.text-wrapper-2 {
+  color: #ffffff;
+  font-family: "Istok Web-Bold", Helvetica;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0;
+  line-height: 27.2px;
+}
+/* LINKS INFERIORES */
+.text-wrapper-3 {
+  position: absolute;
+  top: 585px;
+  left: 116px;
+  font-family: "Istok Web-Regular", Helvetica;
+  font-weight: 400;
+  color: #ffffff;
+  font-size: 17px;
+  text-align: center;
+}
+.text-wrapper-4 {
+  position: absolute;
+  top: 800px;
+  left: 150px;
+  font-family: "Inter-Bold", Helvetica;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 17px;
+  text-align: center;
+}
+/* -------- responsividade no codigo -------- */
+@media (max-width: 480px) {
+  .modelo-iphone {
+    transform: scale(0.9);
+  }
+  .ACESSAR {
+    width: 260px;
+    left: 65px;
+  }
+  .preencher-login,
+  .preencher-senha {
+    width: 260px;
+    left: 65px;
+  }
+  .text-wrapper-3,
+  .text-wrapper-4 {
+    font-size: 15px;
+  }
+}
+

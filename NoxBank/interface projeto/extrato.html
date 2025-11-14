@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Extrato Bancário - ANA DA SILVA</title>
+    <link rel="stylesheet" href="extrato.css" />
+  </head>
+  <body>
+    <div class="extrato-container">
+      <!-- Cabeçalho -->
+      <header class="header">
+        <div class="user-info">
+          <img src="img/rectangle.png" alt="Foto de perfil" />
+          <div class="user-text">
+            <h3>ANA DA SILVA</h3>
+            <p>Agência 0001</p>
+            <p>Conta 40028922-0</p>
+          </div>
+        </div>
+        <img src="img/logo.png" alt="Logo do banco" class="logo" />
+      </header>
+
+      <!-- Botão voltar -->
+      <div class="voltar">←</div>
+
+      <!-- Cartão de saldo -->
+      <section class="saldo-card">
+        <div class="saldo-topo">
+          <h3>Conta</h3>
+          <img src="img/olho.png" alt="Olho" />
+        </div>
+        <h4>Saldo</h4>
+        <h2>R$ 500,00</h2>
+        <button>Guardar na caixinha</button>
+      </section>
+
+      <!-- Histórico -->
+      <section class="historico">
+        <div class="historico-top">
+          <h3>Histórico</h3>
+          <img src="img/icone-seta.png" alt="Ícone" />
+        </div>
+        <input type="text" placeholder="Buscar" class="search-bar" />
+
+        <div class="item-historico">
+          <div class="info-transacao">
+            <p><strong>Cinemark Zona Norte</strong></p>
+            <p>20:05 CRÉDITO</p>
+          </div>
+          <div class="valor">
+            <p><strong>R$ 44,00</strong></p>
+            <a class="ver-mais" href="#">Ver mais</a>
+          </div>
+        </div>
+
+        <div class="item-historico">
+          <div class="info-transacao">
+            <p><strong>Isabella Almeida Soares</strong></p>
+            <p>19:36 PIX</p>
+          </div>
+          <div class="valor">
+            <p><strong>R$ 350,00</strong></p>
+            <!-- Link funcional -->
+            <a class="ver-mais" href="informacaopix.html">Ver mais</a>
+          </div>
+        </div>
+
+        <div class="item-historico">
+          <div class="info-transacao">
+            <p><strong>Padaria Florestal</strong></p>
+            <p>09:22 PIX</p>
+          </div>
+          <div class="valor">
+            <p><strong>R$ 58,00</strong></p>
+            <a class="ver-mais" href="#">Ver mais</a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Script da função voltar -->
+    <script>
+      document.querySelector(".voltar").addEventListener("click", () => {
+        window.location.href = "conta.html";
+      });
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+

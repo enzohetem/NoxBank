@@ -1,0 +1,54 @@
+<!DOCTYPE html> 
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NOX Digital Bank - Pix</title>
+    <link rel="stylesheet" href="globals.css" />
+    <link rel="stylesheet" href="pix.css" />
+  </head>
+
+  <body>
+    <div class="pix-container">
+      <div class="header">
+        <div class="voltar" id="voltarConta">←</div>
+        <h3>Área Pix</h3>
+        <img src="imagens/ooooooo.png" width="45" alt="logo" />
+      </div>
+
+      <div class="pix-content">
+        <div class="pix-icon">
+          <img src="imagens/pixicone.png" alt="Ícone Pix" />
+        </div>
+
+        <p class="pix-label">Pix</p>
+
+        <input
+          type="text"
+          placeholder="CPF, número de telefone ou e-mail"
+          class="campo-pix"
+        />
+
+        <button class="botao-enviar">Continuar</button>
+      </div>
+    </div>
+
+    <script>
+      // botão voltar → leva de volta à conta
+      document.getElementById("voltarConta").addEventListener("click", () => {
+        window.location.href = "conta.html";
+      });
+
+      // botão continuar → leva para a tela de atenção do Pix
+      document.querySelector(".botao-enviar").addEventListener("click", () => {
+        window.location.href = "pixatencao.html";
+      });
+    </script>
+  </body>
+</html>
+
+
+
+
+
+

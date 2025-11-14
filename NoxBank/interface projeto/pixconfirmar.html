@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirmar PIX</title>
+    <link rel="stylesheet" href="pixconfirmar.css" />
+  </head>
+  <body>
+    <main class="reembolso">
+      <!-- Botão Voltar -->
+      <button
+        type="button"
+        class="voltar"
+        aria-label="Voltar"
+        onclick="history.back()"
+      >
+        ←
+      </button>
+
+      <!-- Logo -->
+      <img class="logo" src="img/logo.png" alt="Logo do banco" />
+
+      <!-- Conteúdo central -->
+      <div class="conteudo">
+        <h1 class="nome">Isabella Almeida Soares.</h1>
+        <p class="mensagem">
+          Você deseja enviar para Isabella Almeida Soares R$ 350,00?
+        </p>
+
+        <!-- Botão redirecionando para ENVIADO -->
+        <button
+          class="confirmar"
+          onclick="window.location.href='enviado.html'"
+        >
+          <span>SIM</span>
+        </button>
+      </div>
+    </main>
+  </body>
+</html>
+
+
+
+

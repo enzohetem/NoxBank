@@ -1,0 +1,135 @@
+/* ===== Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background-color: #fdfdfd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* ===== Container principal ===== */
+.pixatencao-container {
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(48, 49, 56, 0.87) 0%,
+    rgba(27, 28, 32, 0.87) 100%
+  );
+  width: 100%;
+  max-width: 393px;
+  height: 852px;
+  border-radius: 40px;
+  padding: 24px;
+  color: white;
+  position: relative;
+}
+
+/* ===== Cabeçalho ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+}
+
+.user-text h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.user-text p {
+  font-size: 13px;
+  color: #c1c1c1;
+  line-height: 16px;
+}
+
+.logo {
+  width: 60px;
+}
+
+/* ===== Botão voltar ===== */
+.voltar {
+  font-size: 22px;
+  cursor: pointer;
+  position: absolute;
+  top: 90px;
+  left: 24px;
+}
+
+/* ===== Conteúdo principal ===== */
+.conteudo {
+  margin-top: 100px;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.icone-alerta {
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+.conteudo h2 {
+  font-size: 26px;
+  color: #ffb400;
+  margin-bottom: 16px;
+}
+
+.mensagem {
+  font-size: 16px;
+  color: #e0e0e0;
+  line-height: 1.5;
+  margin-bottom: 50px;
+}
+
+/* ===== Botões ===== */
+.botoes {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.btn {
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelar {
+  background-color: #2b2c31;
+  color: #fff;
+}
+
+.cancelar:hover {
+  background-color: #3b3c41;
+}
+
+.confirmar {
+  background-color: #b0255a;
+  color: #fff;
+}
+
+.confirmar:hover {
+  background-color: #c2376d;
+}

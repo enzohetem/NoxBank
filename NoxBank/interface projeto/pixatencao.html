@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atenção - PIX</title>
+    <link rel="stylesheet" href="pixatencao.css" />
+  </head>
+  <body>
+    <div class="pixatencao-container">
+      <!-- Cabeçalho -->
+      <header class="header">
+        <div class="user-info">
+          <div class="user-text"></div>
+        </div>
+        <img src="img/logo.png" alt="Logo do banco" class="logo" />
+      </header>
+
+      <!-- Botão voltar -->
+      <div class="voltar" onclick="history.back()">←</div>
+
+      <!-- Conteúdo principal -->
+      <section class="conteudo">
+        <img src="img/icone-alerta.png" alt="Ícone de alerta" class="icone-alerta" />
+        <h2>Atenção</h2>
+        <p class="mensagem">
+          Você está prestes a enviar um PIX para <strong>ISABELLA ALMEIDA SOARES</strong> no valor de 
+          <strong>R$ 350,00</strong>.  
+          Você recebeu um saldo recentemente nesse valor, isso é um estorno? Se "sim" cancele a transação, se for um PIX apenas continue.
+        </p>
+
+        <!-- Botões -->
+        <div class="botoes">
+          <button
+            class="btn cancelar"
+            onclick="window.location.href='informacaopix.html'"
+          >
+            Cancelar envio
+          </button>
+
+          <button
+            class="btn confirmar"
+            onclick="window.location.href='pixconfirmar.html'"
+          >
+            Confirmar assim mesmo
+          </button>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
+
+
+

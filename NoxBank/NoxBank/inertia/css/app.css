@@ -1,0 +1,94 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+/* Toast styles */
+.toast-wrapper {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  transform: translateY(-20px);
+  opacity: 0;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.toast-in {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast-out {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+.toast-card {
+  min-width: 280px;
+  max-width: 92vw;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  backdrop-filter: saturate(150%) blur(8px);
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  opacity: 0.95;
+}
+
+.toast-text {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.toast-progress {
+  position: relative;
+  height: 3px;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.toast-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  transform-origin: left center;
+  animation-name: toast-progress-deplete;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* Invert progress (depletes from right to left) */
+.toast-progress-bar[data-direction='rtl'] {
+  transform-origin: right center;
+}
+
+@keyframes toast-progress-deplete {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}

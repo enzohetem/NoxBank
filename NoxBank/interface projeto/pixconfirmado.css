@@ -1,0 +1,93 @@
+body {
+  background-color: #fdfdfd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+}
+
+.reembolso {
+  width: 393px;
+  height: 852px;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(48, 49, 56, 0.87) 0%,
+    rgba(27, 28, 32, 0.87) 100%
+  );
+  border-radius: 25px;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+/* Botão Voltar */
+.voltar {
+  position: absolute;
+  top: 30px;
+  left: 20px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Logo */
+.logo {
+  position: absolute;
+  top: 30px;
+  right: 20px;
+  width: 60px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Conteúdo Central */
+.conteudo {
+  margin-top: auto;
+  margin-bottom: auto;
+  text-align: center;
+  color: #fff;
+}
+
+.nome {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.mensagem {
+  font-size: 16px;
+  font-weight: 400;
+  margin-bottom: 35px;
+  line-height: 1.4em;
+}
+
+/* Botão Confirmar */
+.confirmar {
+  width: 80%;
+  max-width: 300px;
+  height: 50px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(159, 17, 70, 1) 0%, rgba(186, 32, 91, 1) 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.confirmar:hover {
+  opacity: 0.9;
+}
+
+.confirmar:active {
+  opacity: 0.8;
+}

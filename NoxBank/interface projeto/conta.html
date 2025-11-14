@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NOX Digital Bank - Conta</title>
+    <link rel="stylesheet" href="globals.css" />
+    <link rel="stylesheet" href="conta.css" />
+  </head>
+
+  <body>
+    <div class="conta-container">
+      <div class="header">
+        <div class="user-info">
+          <h3>ANA DA SILVA</h3>
+          <p>Agência 0001</p>
+          <p>Conta 40028922-0</p>
+        </div>
+        <img src="imagens/ooooooo.png" width="45" alt="logo" />
+      </div>
+
+      <div class="saldo-card">
+        <h3>Conta <span style="float:right;">Extrato &gt;</span></h3>
+        <h2>R$ 500,00</h2>
+        <button>Guardar na caixinha</button>
+      </div>
+
+      <div class="acoes">
+        <div id="abrirPix">
+          <img src="imagens/pixx.png" alt="Pix" />
+          <span>Pix</span>
+        </div>
+        <div>
+          <img src="imagens/trans2.png" alt="Transferência" />
+          <span>Transferência</span>
+        </div>
+        <div>
+          <img src="imagens/boleto2.png" alt="Boleto" />
+          <span>Pagar boleto</span>
+        </div>
+      </div>
+
+      <div class="cartao">
+        <p>
+          Cartão de crédito
+          <span class="seta" id="abrirExtrato">→</span>
+        </p>
+        <p>Fatura atual</p>
+        <p class="valor">R$ 1380,54</p>
+        <p>Limite disponível de R$ 890,60</p>
+      </div>
+    </div>
+
+    <script>
+      // mantém o botão da seta funcionando
+      document.getElementById("abrirExtrato").addEventListener("click", () => {
+        window.location.href = "extrato.html";
+      });
+
+      // adiciona o botão do Pix
+      document.getElementById("abrirPix").addEventListener("click", () => {
+        window.location.href = "pix.html";
+      });
+    </script>
+  </body>
+</html>
+
+
+

@@ -1,0 +1,59 @@
+  <!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="globals.css" />
+    <link rel="stylesheet" href="style.css" />
+    <title>simulado app</title>
+  </head>
+  <body>
+    <div class="modelo-iphone">
+      <img class="logo-banco" src="imagens/logo-banco.png" alt="Logo do banco" />
+
+      <div class="preencher-login">
+        <input
+          type="text"
+          class="input-login"
+          placeholder="Login"
+          required
+        />
+        <img class="image" src="imagens/image-1.png" alt="ícone login" />
+      </div>
+
+      <div class="preencher-senha">
+        <input
+          type="password"
+          class="input-senha"
+          placeholder="Senha"
+          required
+        />
+        <img class="sem" src="imagens/sem.png" alt="ícone senha" />
+      </div>
+
+      <button class="ACESSAR">
+        <div class="text-wrapper-2">ACESSAR</div>
+      </button>
+
+      <div class="text-wrapper-3">Esqueci minha senha</div>
+      <div class="text-wrapper-4">Abrir conta</div>
+
+      <img class="informacao" src="imagens/informacao.png" alt="Informações" />
+      <img class="suporte" src="imagens/suporte.png" alt="Suporte" />
+    </div>
+
+    <script>
+      const botaoAcessar = document.querySelector(".ACESSAR");
+
+      botaoAcessar.addEventListener("click", function (event) {
+        event.preventDefault(); 
+        window.location.href = "conta.html";
+      });
+    </script>
+  </body>
+</html>
+
+
+
+
+
