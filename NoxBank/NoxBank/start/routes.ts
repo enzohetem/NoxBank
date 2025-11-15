@@ -35,22 +35,27 @@ router
 
     // PIX
     router.get('/pix', [PixController, 'create']).as('pix.create')
-    router.get('/pixvalor', [PixController, 'showValor']).as('pix.valor')
+    router.post('/pixvalor', [PixController, 'showValor']).as('pix.valor')
     router.post('/pix/validate', [PixController, 'validate']).as('pix.validate')
-    router.post('/pix', [PixController, 'store']).as('pix.store')
+    router.get('/pixatencao', [PixController, 'showAtencao']).as('pix.atencao')
+    router.get('/pixconfirmar', [PixController, 'showConfirmar']).as('pix.confirmar')
+    router.post('/pix/transfer', [PixController, 'store']).as('pix.store')
     router.post('/pix/refund', [PixController, 'refund']).as('pix.refund')
+    router.get('/estorno', [PixController, 'showRefundPage']).as('pix.estorno')
 
-    // Páginas intermediárias do PIX (usam rotas simples pois só exibem UI)
-    router.on('/pixatencao').renderInertia('pixatencao')
-    router.on('/pixconfirmar').renderInertia('pixconfirmar')
-    router.on('/enviado').renderInertia('enviado')
+    // Página de sucesso
+    router.get('/enviado', [PixController, 'showEnviado']).as('pix.enviado')
 
     // Transações / Extrato
     router.get('/extrato', [TransactionController, 'index']).as('extrato')
     router.get('/informacaopix/:id', [TransactionController, 'show']).as('transaction.show')
 
-    // Reembolso
-    router.on('/reembolso1').renderInertia('reembolso1')
-    router.on('/reembolso2').renderInertia('reembolso2')
+    // (Rotas antigas de reembolso removidas)
   })
   .use(middleware.auth())
+
+// Fallback: qualquer rota não mapeada → página 404 Inertia
+router.any('*', async ({ inertia, response }) => {
+  response.status(404)
+  return inertia.render('errors/notfound')
+})

@@ -2,9 +2,11 @@
 /// <reference path="../../config/inertia.ts" />
 
 import '../css/app.css'
+import 'react-toastify/dist/ReactToastify.css'
 import { createRoot } from 'react-dom/client'
 import { createInertiaApp } from '@inertiajs/react'
 import { resolvePageComponent } from '@adonisjs/inertia/helpers'
+import Layout from './layout'
 
 const appName = import.meta.env.VITE_APP_NAME || 'AdonisJS'
 
@@ -13,8 +15,13 @@ createInertiaApp({
 
   title: (title) => `${title} - ${appName}`,
 
-  resolve: (name) => {
-    return resolvePageComponent(`../pages/${name}.tsx`, import.meta.glob('../pages/**/*.tsx'))
+  resolve: async (name) => {
+    const page: any = await resolvePageComponent(
+      `../pages/${name}.tsx`,
+      import.meta.glob('../pages/**/*.tsx')
+    )
+    page.default.layout = page.default.layout || ((page: any) => <Layout>{page}</Layout>)
+    return page
   },
 
   setup({ el, App, props }) {

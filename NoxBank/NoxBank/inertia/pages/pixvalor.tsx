@@ -1,7 +1,9 @@
 ﻿import { Head, router } from '@inertiajs/react'
 import { HomeIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
 import { useState, useRef } from 'react'
-import Toast from '~/components/Toast'
+import { toast } from 'react-toastify'
+import { xsrfHeader } from '../app/utils/csrf'
+import LogoutButton from '../components/logout'
 
 interface PixValorProps {
   user: {
@@ -18,11 +20,6 @@ interface PixValorProps {
 
 export default function PixValor({ user, receiver }: PixValorProps) {
   const [amount, setAmount] = useState('')
-  const [toast, setToast] = useState({
-    show: false,
-    message: '',
-    type: 'error' as 'error' | 'success',
-  })
   const inputRef = useRef<HTMLInputElement>(null)
 
   const formatCurrency = (value: number) => {
@@ -91,78 +88,38 @@ export default function PixValor({ user, receiver }: PixValorProps) {
     return { valid: true, message: '' }
   }
 
-  const handleContinue = async () => {
+  const handleContinue = () => {
     const validation = validateAmount()
 
     if (!validation.valid) {
-      setToast({ show: true, message: validation.message, type: 'error' })
+      toast.error(validation.message)
       inputRef.current?.focus()
       return
     }
 
     const parsedAmount = parseAmount(amount)
 
-    // Valida no backend e verifica alertas de possível golpe
-    try {
-      const response = await fetch('/pix/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    // Envia validação com os dados - backend redireciona automaticamente para pixatencao ou pixconfirmar
+    router.post(
+      '/pix/validate',
+      {
+        receiverId: receiver.id,
+        amount: parsedAmount,
+        receiverPixKey: receiver.pixKey,
+      },
+      {
+        preserveScroll: true,
+        headers: xsrfHeader(),
+        onError: (errors: any) => {
+          toast.error(errors.error || 'Erro ao validar transferência')
         },
-        body: JSON.stringify({
-          identifier: receiver.pixKey,
-          amount: parsedAmount,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setToast({
-          show: true,
-          message: data.error || 'Erro ao validar transferência',
-          type: 'error',
-        })
-        return
       }
-
-      // Se há alerta de possível golpe, redireciona para página de atenção
-      if (data.hasAlert) {
-        router.visit('/pixatencao', {
-          method: 'get',
-          data: {
-            receiverId: receiver.id,
-            receiverName: receiver.fullName,
-            amount: parsedAmount,
-            alertMessage: data.alertMessage,
-          },
-        })
-      } else {
-        // Caso contrário, vai direto para confirmação
-        router.visit('/pixconfirmar', {
-          method: 'get',
-          data: {
-            receiverId: receiver.id,
-            receiverName: receiver.fullName,
-            receiverCpf: receiver.cpf,
-            amount: parsedAmount,
-          },
-        })
-      }
-    } catch (error) {
-      setToast({ show: true, message: 'Erro ao processar solicitação', type: 'error' })
-    }
+    )
   }
 
   return (
     <>
       <Head title="Valor da Transferência PIX" />
-      <Toast
-        show={toast.show}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ show: false, message: '', type: 'error' })}
-      />
       <div className="min-h-screen bg-gray-950 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -179,11 +136,14 @@ export default function PixValor({ user, receiver }: PixValorProps) {
                   </p>
                 </div>
               </div>
-              <img
-                src="/resources/imagens/logo-banco.png"
-                className="w-24 h-16 object-contain"
-                alt="logo"
-              />
+              <div className="flex items-center gap-4">
+                <img
+                  src="/resources/imagens/logo-banco.png"
+                  className="w-24 h-16 object-contain"
+                  alt="logo"
+                />
+                <LogoutButton size="md" />
+              </div>
             </div>
           </div>
 

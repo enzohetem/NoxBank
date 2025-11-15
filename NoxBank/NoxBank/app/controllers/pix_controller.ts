@@ -20,13 +20,84 @@ export default class PixController {
   }
 
   /**
+   * Exibe página de estorno seguro, sugerindo a transação elegível
+   */
+  async showRefundPage({ auth, request, inertia, session }: HttpContext) {
+    const user = auth.user!
+
+    // Pode vir por querystring ou da sessão do fluxo PIX
+    const qs = request.qs()
+    const pixData = session.get('pixData')
+
+    const transactionId = qs.transactionId ? Number(qs.transactionId) : undefined
+    const receiverId = qs.receiverId ? Number(qs.receiverId) : pixData?.receiverId
+    const amount = qs.amount ? Number(qs.amount) : pixData?.amount
+
+    let candidate: Transaction | null = null
+
+    if (transactionId) {
+      // Busca transação específica se o ID foi informado
+      candidate = await Transaction.query()
+        .where('id', transactionId)
+        .where('receiver_id', user.id)
+        .where('status', 'completed')
+        .where('type', 'PIX')
+        .preload('sender')
+        .first()
+    } else if (receiverId && amount) {
+      // Busca transação recente compatível com alerta
+      candidate = await Transaction.query()
+        .where('sender_id', receiverId)
+        .where('receiver_id', user.id)
+        .where('amount', amount)
+        .where('type', 'PIX')
+        .where('status', 'completed')
+        .where('created_at', '>=', db.raw("datetime('now', '-7 days')"))
+        .preload('sender')
+        .orderBy('created_at', 'desc')
+        .first()
+    }
+
+    if (!candidate) {
+      // Nada elegível para estorno
+      return inertia.render('estorno', {
+        user: { fullName: user.fullName, balance: Number(user.balance) },
+        eligible: null,
+        message: 'Nenhuma transação elegível para estorno foi encontrada para os dados informados.',
+      })
+    }
+
+    // Verifica se já foi estornado
+    const alreadyRefunded = await Transaction.query()
+      .where('sender_id', user.id)
+      .where('receiver_id', candidate.senderId)
+      .where('amount', candidate.amount)
+      .where('type', 'REFUND')
+      .whereRaw('created_at > ?', [candidate.createdAt.toISO() || ''])
+      .first()
+
+    return inertia.render('estorno', {
+      user: { fullName: user.fullName, balance: Number(user.balance) },
+      eligible: {
+        id: candidate.id,
+        name: candidate.sender?.fullName || 'Desconhecido',
+        amount: Number(candidate.amount),
+        date: candidate.createdAt.toFormat('dd LLL yyyy - HH:mm:ss'),
+        alreadyRefunded: !!alreadyRefunded,
+      },
+      message: null,
+    })
+  }
+
+  /**
    * Exibe a tela de inserção de valor com dados do destinatário validado
    */
-  async showValor({ auth, request, response, inertia }: HttpContext) {
+  async showValor({ auth, request, response, inertia, session }: HttpContext) {
     const user = auth.user!
-    const { identifier } = request.qs()
+    const { identifier } = request.only(['identifier'])
 
     if (!identifier) {
+      session.flash('error', 'Chave PIX não informada')
       return response.redirect('/pix')
     }
 
@@ -38,10 +109,12 @@ export default class PixController {
       .first()
 
     if (!receiver) {
+      session.flash('error', 'Chave PIX não encontrada. Verifique e tente novamente.')
       return response.redirect().toRoute('pix.create')
     }
 
     if (receiver.id === user.id) {
+      session.flash('error', 'Você não pode enviar PIX para si mesmo')
       return response.redirect().toRoute('pix.create')
     }
 
@@ -53,7 +126,7 @@ export default class PixController {
       receiver: {
         id: receiver.id,
         fullName: receiver.fullName,
-        cpf: receiver.cpf,
+        cpf: `${receiver.cpf.slice(0, 3)}.***.***-**${receiver.cpf.slice(-2)}`,
         pixKey: identifier,
       },
     })
@@ -62,27 +135,21 @@ export default class PixController {
   /**
    * Valida destinatário e verifica alertas de possível golpe
    */
-  async validate({ auth, request, response }: HttpContext) {
+  async validate({ auth, request, response, session }: HttpContext) {
     const user = auth.user!
-    const { identifier, amount } = request.only(['identifier', 'amount'])
+    const { receiverId, amount, receiverPixKey } = request.all()
 
     // Busca o destinatário por CPF, email ou telefone
-    const receiver = await User.query()
-      .where('cpf', identifier)
-      .orWhere('email', identifier)
-      .orWhere('phone', identifier)
-      .first()
+    const receiver = await User.query().where('id', receiverId).first()
 
     if (!receiver) {
-      return response.badRequest({
-        error: 'Destinatário não encontrado',
-      })
+      session.flash('error', 'Destinatário não encontrado')
+      return response.redirect('/pix')
     }
 
     if (receiver.id === user.id) {
-      return response.badRequest({
-        error: 'Você não pode enviar PIX para si mesmo',
-      })
+      session.flash('error', 'Você não pode enviar PIX para si mesmo')
+      return response.redirect('/pix')
     }
 
     // Verifica se há transações recentes do destinatário para o usuário com o mesmo valor
@@ -97,92 +164,188 @@ export default class PixController {
 
     const hasAlert = !!recentTransaction
 
-    return response.ok({
+    logger.info(
+      `Validação PIX - receiverId: ${receiver.id}, amount: ${amount}, hasAlert: ${hasAlert}`
+    )
+
+    // Armazena dados na sessão para as próximas etapas
+    session.put('pixData', {
+      receiverId: receiver.id,
+      amount: amount,
+      receiverFullName: receiver.fullName,
+      receiverCpf: receiver.cpf,
+      receiverPixKey: receiverPixKey,
+    })
+
+    // Redireciona para a página apropriada
+    if (hasAlert) {
+      return response.redirect('/pixatencao')
+    } else {
+      return response.redirect('/pixconfirmar')
+    }
+  }
+
+  /**
+   * Exibe tela de atenção (possível golpe)
+   */
+  async showAtencao({ auth, request, response, inertia, session }: HttpContext) {
+    const user = auth.user!
+    const pixData = session.get('pixData')
+    const qs = request.qs()
+
+    const receiverId = qs.receiverId ? Number(qs.receiverId) : pixData?.receiverId
+    const amount = qs.amount ? Number(qs.amount) : pixData?.amount
+
+    if (!receiverId || !amount) {
+      session.flash('error', 'Dados incompletos')
+      return response.redirect('/pix')
+    }
+
+    const receiver = await User.findOrFail(receiverId)
+
+    // Busca transação recente para montar mensagem
+    const recentTransaction = await Transaction.query()
+      .where('sender_id', receiver.id)
+      .where('receiver_id', user.id)
+      .where('amount', amount)
+      .where('type', 'PIX')
+      .where('status', 'completed')
+      .where('created_at', '>=', db.raw("datetime('now', '-7 days')"))
+      .first()
+
+    const alertMessage = recentTransaction
+      ? `Você recebeu recentemente R$ ${Number(amount).toFixed(2)} de ${receiver.fullName}. Isso pode ser uma tentativa de golpe! Se foi um valor enviado por engano, NÃO devolva via PIX. Use o botão de ESTORNO SEGURO para evitar fraudes.`
+      : `Esta transação pode apresentar riscos. Verifique cuidadosamente os dados antes de continuar.`
+
+    return inertia.render('pixatencao', {
+      user: {
+        fullName: user.fullName,
+        balance: user.balance,
+      },
       receiver: {
         id: receiver.id,
         fullName: receiver.fullName,
-        cpf: receiver.cpf,
+        cpf: `${receiver.cpf.slice(0, 3)}.***.***-**${receiver.cpf.slice(-2)}`,
+        pixKey: pixData?.receiverPixKey || receiver.cpf,
       },
-      amount,
-      hasAlert,
-      alertMessage: hasAlert
-        ? `Atenção! Você recebeu recentemente R$ ${amount.toFixed(2)} de ${receiver.fullName}. Se foi um valor enviado por engano, NÃO devolva via PIX. Use o botão de ESTORNO para evitar golpes.`
-        : null,
+      amount: Number(amount),
+      alertMessage,
+    })
+  }
+
+  /**
+   * Exibe tela de confirmação final
+   */
+  async showConfirmar({ auth, request, response, inertia, session }: HttpContext) {
+    const user = auth.user!
+    const pixData = session.get('pixData')
+    const qs = request.qs()
+
+    const receiverId = qs.receiverId ? Number(qs.receiverId) : pixData?.receiverId
+    const amount = qs.amount ? Number(qs.amount) : pixData?.amount
+
+    logger.info(`ROTA PIX CONFIRMAR ACESSADA - receiverId: ${receiverId}, amount: ${amount}`)
+
+    if (!receiverId || !amount) {
+      session.flash('error', 'Dados incompletos')
+      return response.redirect('/pix')
+    }
+
+    const receiver = await User.findOrFail(receiverId)
+
+    return inertia.render('pixconfirmar', {
+      user: {
+        fullName: user.fullName,
+        balance: user.balance,
+      },
+      receiver: {
+        id: receiver.id,
+        fullName: receiver.fullName,
+        cpf: `${receiver.cpf.slice(0, 3)}.***.***-**${receiver.cpf.slice(-2)}`,
+        pixKey: pixData?.receiverPixKey || receiver.cpf,
+      },
+      amount: Number(amount),
     })
   }
 
   /**
    * Processa a transferência PIX
    */
-  async store({ auth, request, response }: HttpContext) {
+  async store({ auth, request, response, session }: HttpContext) {
     const user = auth.user!
     const { receiverId, amount } = request.only(['receiverId', 'amount'])
 
     const parsedAmount = parseFloat(amount)
 
     if (parsedAmount <= 0 || isNaN(parsedAmount)) {
-      return response.badRequest({
-        error: 'Valor inválido',
-      })
+      session.flash('error', 'Valor inválido')
+      return response.redirect('/pix')
     }
 
     if (user.balance < parsedAmount) {
-      return response.badRequest({
-        error: 'Saldo insuficiente',
-      })
+      session.flash('error', 'Saldo insuficiente')
+      return response.redirect('/pix')
     }
 
     const receiver = await User.findOrFail(receiverId)
 
     if (receiver.id === user.id) {
-      return response.badRequest({
-        error: 'Você não pode enviar PIX para si mesmo',
-      })
+      session.flash('error', 'Você não pode enviar PIX para si mesmo')
+      return response.redirect('/pix')
     }
 
     // Inicia transação no banco
     const trx = await db.transaction()
 
     try {
-      // Debita do remetente
-      user.balance -= parsedAmount
-      await user.save()
+      // Calcula novos saldos com coerção explícita
+      const senderCurrent = Number(user.balance)
+      const receiverCurrent = Number(receiver.balance)
+      const senderNew = senderCurrent - parsedAmount
+      const receiverNew = receiverCurrent + parsedAmount
 
-      // Credita ao destinatário
-      receiver.balance += parsedAmount
-      await receiver.save()
+      // Atualiza saldos diretamente via SQL dentro da mesma transação
+      await User.query({ client: trx }).where('id', user.id).update({ balance: senderNew })
+      await User.query({ client: trx }).where('id', receiver.id).update({ balance: receiverNew })
 
       // Registra a transação
-      const transaction = await Transaction.create({
-        senderId: user.id,
-        receiverId: receiver.id,
-        amount: parsedAmount,
-        type: 'PIX',
-        status: 'completed',
-      })
+      await Transaction.create(
+        {
+          senderId: user.id,
+          receiverId: receiver.id,
+          amount: parsedAmount,
+          type: 'PIX',
+          status: 'completed',
+        },
+        { client: trx }
+      )
 
       await trx.commit()
 
-      return response.created({
-        success: true,
-        transaction: {
-          id: transaction.id,
-          receiverName: receiver.fullName,
-          amount: parsedAmount,
-        },
+      // Limpa dados temporários do fluxo PIX
+      session.forget('pixData')
+
+      session.flash('success', 'Transferência realizada com sucesso!')
+
+      // Armazena dados da transação para a página de sucesso
+      session.put('lastTransaction', {
+        receiverFullName: receiver.fullName,
+        amount: parsedAmount,
       })
+
+      return response.redirect('/enviado')
     } catch (error) {
       await trx.rollback()
-      return response.internalServerError({
-        error: 'Erro ao processar a transação',
-      })
+      logger.error('Erro ao processar PIX', { error })
+      session.flash('error', 'Erro ao processar a transação')
+      return response.redirect('/pix')
     }
   }
 
   /**
    * Processa estorno seguro (apenas para quem recebeu)
    */
-  async refund({ auth, request, response }: HttpContext) {
+  async refund({ auth, request, response, session }: HttpContext) {
     const user = auth.user!
     const { transactionId } = request.only(['transactionId'])
 
@@ -224,44 +387,42 @@ export default class PixController {
 
     // Inicia transação no banco
     const trx = await db.transaction()
-
     try {
-      // Debita de quem está estornando
-      user.balance -= transaction.amount
-      await user.save()
+      // Usa queries diretas dentro da transação para garantir atomicidade
+      const userCurrent = Number(user.balance)
+      const senderCurrent = Number(sender.balance)
+      const amt = Number(transaction.amount)
 
-      // Credita ao remetente original
-      sender.balance += transaction.amount
-      await sender.save()
+      const userNew = userCurrent - amt
+      const senderNew = senderCurrent + amt
 
-      // Registra o estorno
-      const refundTransaction = await Transaction.create({
-        senderId: user.id,
-        receiverId: sender.id,
-        amount: transaction.amount,
-        type: 'REFUND',
-        status: 'completed',
-      })
+      await User.query({ client: trx }).where('id', user.id).update({ balance: userNew })
+      await User.query({ client: trx }).where('id', sender.id).update({ balance: senderNew })
 
-      // Marca a transação original como estornada
-      transaction.status = 'refunded'
-      await transaction.save()
+      await Transaction.create(
+        {
+          senderId: user.id,
+          receiverId: sender.id,
+          amount: amt,
+          type: 'REFUND',
+          status: 'completed',
+        },
+        { client: trx }
+      )
+
+      await Transaction.query({ client: trx })
+        .where('id', transaction.id)
+        .update({ status: 'refunded' })
 
       await trx.commit()
 
-      return response.ok({
-        success: true,
-        transaction: {
-          id: refundTransaction.id,
-          receiverName: sender.fullName,
-          amount: transaction.amount,
-        },
-      })
+      // Flash e redirect para extrato (ou conta) garantindo feedback Inertia
+      session.flash('success', 'Estorno realizado com sucesso')
+      return response.redirect('/extrato')
     } catch (error) {
       await trx.rollback()
-      return response.internalServerError({
-        error: 'Erro ao processar o estorno',
-      })
+      session.flash('error', 'Erro ao processar o estorno')
+      return response.redirect('/informacaopix/' + transaction.id)
     }
   }
 
@@ -271,6 +432,8 @@ export default class PixController {
   async showAccount({ auth, inertia }: HttpContext) {
     logger.info(`ROTA CONTA ACESSADA`)
     const user = auth.user!
+    // Recarrega o usuário para garantir saldo atualizado
+    await user.refresh()
 
     return inertia.render('Conta', {
       user: {
@@ -282,6 +445,27 @@ export default class PixController {
         email: user.email,
         cpf: user.cpf,
         phone: user.phone,
+      },
+    })
+  }
+
+  /**
+   * Exibe página de sucesso da transferência
+   */
+  async showEnviado({ auth, inertia, session }: HttpContext) {
+    const user = auth.user!
+    // Garante que o saldo exibido reflita a última transação
+    await user.refresh()
+    const lastTransaction = session.get('lastTransaction')
+
+    return inertia.render('enviado', {
+      user: {
+        fullName: user.fullName,
+        balance: Number(user.balance),
+      },
+      transaction: lastTransaction || {
+        receiverFullName: 'Destinatário',
+        amount: 0,
       },
     })
   }

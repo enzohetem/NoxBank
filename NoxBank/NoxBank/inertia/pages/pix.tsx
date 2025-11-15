@@ -1,7 +1,9 @@
-﻿import { Head, router } from '@inertiajs/react'
+﻿import { Head, router, usePage } from '@inertiajs/react'
 import { HomeIcon } from '@heroicons/react/24/solid'
-import { useState, useRef } from 'react'
-import Toast from '~/components/Toast'
+import { useState, useRef, useEffect } from 'react'
+import { toast } from 'react-toastify'
+import { xsrfHeader } from '../app/utils/csrf'
+import LogoutButton from '../components/logout'
 
 interface PixProps {
   user: {
@@ -13,8 +15,15 @@ interface PixProps {
 export default function Pix({ user }: PixProps) {
   const [pixKey, setPixKey] = useState('')
   const [keyType, setKeyType] = useState<'cpf' | 'phone' | 'email' | 'random'>('cpf')
-  const [toast, setToast] = useState({ show: false, message: '' })
   const inputRef = useRef<HTMLInputElement>(null)
+  const page = usePage<{ error?: string }>()
+  const flashError = page.props.error
+
+  useEffect(() => {
+    if (flashError) {
+      toast.error(flashError)
+    }
+  }, [flashError])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -82,27 +91,27 @@ export default function Pix({ user }: PixProps) {
     const validation = validatePixKey(pixKey, keyType)
 
     if (!validation.valid) {
-      setToast({ show: true, message: validation.message })
+      toast.error(validation.message)
       scrollToInput()
       return
     }
 
     // Navega para próxima etapa passando a chave
-    router.visit('/pixvalor', {
-      method: 'get',
-      data: { identifier: pixKey },
-    })
+    // O backend irá validar se a chave existe
+    router.post(
+      '/pixvalor',
+      {
+        identifier: pixKey,
+      },
+      {
+        headers: xsrfHeader(),
+      }
+    )
   }
 
   return (
     <>
       <Head title="Transferência PIX" />
-      <Toast
-        show={toast.show}
-        message={toast.message}
-        type="error"
-        onClose={() => setToast({ show: false, message: '' })}
-      />
       <div className="min-h-screen bg-gray-950 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -119,11 +128,14 @@ export default function Pix({ user }: PixProps) {
                   </p>
                 </div>
               </div>
-              <img
-                src="/resources/imagens/logo-banco.png"
-                className="w-24 h-16 object-contain"
-                alt="logo"
-              />
+              <div className="flex items-center gap-4">
+                <img
+                  src="/resources/imagens/logo-banco.png"
+                  className="w-24 h-16 object-contain"
+                  alt="logo"
+                />
+                <LogoutButton size="md" />
+              </div>
             </div>
           </div>
 

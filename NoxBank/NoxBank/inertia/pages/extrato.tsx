@@ -1,8 +1,10 @@
 import { Head, router } from '@inertiajs/react'
+import LogoutButton from '../components/logout'
 import { HomeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid'
 
 interface ExtratoProps {
   user: {
+    id: number
     fullName: string
     balance: number
     account: string
@@ -10,6 +12,8 @@ interface ExtratoProps {
   }
   transactions: Array<{
     id: number
+    senderId: number
+    receiverId: number
     name: string
     amount: number
     type: string
@@ -25,6 +29,28 @@ export default function Extrato({ user, transactions }: ExtratoProps) {
       style: 'currency',
       currency: 'BRL',
     }).format(value)
+  }
+
+  const translateStatus = (status: string, type: string, isSent: boolean) => {
+    if (type === 'REFUND') {
+      return isSent ? 'Estorno enviado' : 'Estorno recebido'
+    }
+    switch (status) {
+      case 'pending':
+        return 'Pendente'
+      case 'completed':
+        return 'Concluído'
+      case 'refunded':
+        return 'Estornado'
+      default:
+        return status
+    }
+  }
+
+  const translateType = (type: string, status: string) => {
+    if (type === 'REFUND') return 'Estorno'
+    if (type === 'PIX' && status === 'refunded') return 'PIX (Estornado)'
+    return type
   }
 
   return (
@@ -46,11 +72,14 @@ export default function Extrato({ user, transactions }: ExtratoProps) {
                   </p>
                 </div>
               </div>
-              <img
-                src="/resources/imagens/logo-banco.png"
-                alt="Logo do banco"
-                className="w-24 h-16 object-contain"
-              />
+              <div className="flex items-center gap-4">
+                <img
+                  src="/resources/imagens/logo-banco.png"
+                  alt="Logo do banco"
+                  className="w-24 h-16 object-contain"
+                />
+                <LogoutButton size="md" />
+              </div>
             </div>
           </div>
 
@@ -64,9 +93,6 @@ export default function Extrato({ user, transactions }: ExtratoProps) {
                   <h2 className="text-4xl text-white font-bold mt-4">
                     {formatCurrency(user.balance)}
                   </h2>
-                  <button className="mt-4 px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-all duration-150 text-base text-white font-bold rounded-lg">
-                    Guardar na caixinha
-                  </button>
                 </div>
               </div>
             </div>
@@ -85,39 +111,76 @@ export default function Extrato({ user, transactions }: ExtratoProps) {
                     className="w-full bg-transparent px-3 py-1 text-white placeholder-gray-400 focus:outline-none"
                   />
                 </div>
-
+                {console.log(transactions, user)}
                 <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-rose-600 scrollbar-track-gray-800">
                   {transactions.length === 0 ? (
                     <p className="text-center text-gray-400 py-12">Nenhuma transação encontrada</p>
                   ) : (
-                    transactions.map((transaction) => (
-                      <div
-                        key={transaction.id}
-                        className="flex items-center justify-between p-4 bg-gray-800 rounded-xl shadow hover:bg-gray-750 transition-all duration-150"
-                      >
-                        <div className="flex-1">
-                          <p className="font-semibold text-white text-lg">{transaction.name}</p>
-                          <p className="text-sm text-gray-400 mt-1">
-                            {transaction.date.split(' - ')[1]} • {transaction.type}
-                          </p>
+                    transactions.map((transaction) => {
+                      const hora = transaction.date.split(' - ')[1]
+                      const statusLabel = translateStatus(
+                        transaction.status,
+                        transaction.type,
+                        transaction.isSent
+                      )
+                      const typeLabel = translateType(transaction.type, transaction.status)
+                      const refundSign = transaction.type === 'REFUND'
+
+                      return (
+                        <div
+                          key={transaction.id}
+                          className="flex items-center justify-between p-4 bg-gray-800 rounded-xl shadow hover:bg-gray-750 transition-all duration-150"
+                        >
+                          <div className="flex-1">
+                            <p className="font-semibold text-white text-lg flex items-center gap-2">
+                              {transaction.name}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1 flex flex-wrap gap-2 items-center">
+                              <span>{hora}</span>
+                              <span className="px-2 py-0.5 text-xs rounded-full bg-blue-600/20 text-blue-400 font-medium border border-blue-600/30">
+                                PIX
+                              </span>
+                              {transaction.type === 'REFUND' &&
+                                transaction.status === 'completed' &&
+                                transaction.senderId === user.id && (
+                                  <span className="px-2 py-0.5 text-xs rounded-full bg-red-600/20 text-red-300 font-medium border border-red-600/30">
+                                    Estorno Enviado
+                                  </span>
+                                )}
+                              {transaction.type === 'REFUND' &&
+                                transaction.status === 'completed' &&
+                                transaction.receiverId === user.id && (
+                                  <span className="px-2 py-0.5 text-xs rounded-full bg-green-600/20 text-green-400 font-medium border border-green-600/30">
+                                    Estorno Recebido
+                                  </span>
+                                )}
+                              {transaction.type === 'PIX' &&
+                                transaction.status === 'refunded' &&
+                                transaction.senderId === user.id && (
+                                  <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-600/20 text-yellow-300 font-medium border border-yellow-600/30">
+                                    Estornado
+                                  </span>
+                                )}
+                            </p>
+                          </div>
+                          <div className="text-right ml-4">
+                            <p
+                              className={`font-bold text-xl ${
+                                transaction.isSent ? 'text-red-400' : 'text-green-400'
+                              }`}
+                            >
+                              {transaction.isSent ? '-' : '+'} {formatCurrency(transaction.amount)}
+                            </p>
+                            <button
+                              className="text-sm text-white hover:text-gray-200 hover:underline mt-1"
+                              onClick={() => router.visit(`/informacaopix/${transaction.id}`)}
+                            >
+                              Ver detalhes
+                            </button>
+                          </div>
                         </div>
-                        <div className="text-right ml-4">
-                          <p
-                            className={`font-bold text-xl ${
-                              transaction.isSent ? 'text-red-400' : 'text-green-400'
-                            }`}
-                          >
-                            {transaction.isSent ? '-' : '+'} {formatCurrency(transaction.amount)}
-                          </p>
-                          <button
-                            className="text-sm text-rose-600 hover:text-rose-500 hover:underline mt-1"
-                            onClick={() => router.visit(`/informacaopix/${transaction.id}`)}
-                          >
-                            Ver detalhes
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      )
+                    })
                   )}
                 </div>
               </div>

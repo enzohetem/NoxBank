@@ -31,15 +31,15 @@ export default class extends BaseSeeder {
     )
 
     // Criar usuário João (outro usuário de teste)
-    const joao = await User.updateOrCreate(
-      { email: 'joao@example.com' },
+    const passigo = await User.updateOrCreate(
+      { email: 'passigo@example.com' },
       {
-        fullName: 'João Pedro Santos',
-        email: 'joao@example.com',
-        password: 'senha123',
+        fullName: 'Felipe Passigo',
+        email: 'passigo@example.com',
+        password: '123',
         cpf: '456.789.123-00',
         phone: '11999887766',
-        balance: 2000.0,
+        balance: 200000.0,
       }
     )
 
@@ -63,12 +63,12 @@ export default class extends BaseSeeder {
     await Transaction.updateOrCreate(
       {
         senderId: ana.id,
-        receiverId: joao.id,
+        receiverId: passigo.id,
         amount: 58.0,
       },
       {
         senderId: ana.id,
-        receiverId: joao.id,
+        receiverId: passigo.id,
         amount: 58.0,
         type: 'PIX',
         status: 'completed',
@@ -79,6 +79,6 @@ export default class extends BaseSeeder {
     console.log('👤 Usuários criados:')
     console.log(`   - Isabella: ${isabella.email} (senha: senha123)`)
     console.log(`   - Ana: ${ana.email} (senha: senha123)`)
-    console.log(`   - João: ${joao.email} (senha: senha123)`)
+    console.log(`   - Felipe: ${passigo.email} (senha: senha123)`)
   }
 }

@@ -1,46 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Head, useForm, usePage } from '@inertiajs/react'
-import Toast from '../../components/Toast'
+import { toast } from 'react-toastify'
 
 export default function Login() {
   const { data, setData, post, processing } = useForm({
     email: '',
     password: '',
   })
-  const [showError, setShowError] = useState(false)
-  const [toastKey, setToastKey] = useState(0)
-  const TOAST_DURATION = 4200
   const page = usePage<{ error?: string }>()
   const flashError = page.props.error
-  const hideTimer = useRef<number | null>(null)
-
-  const showErrorToast = () => {
-    if (hideTimer.current) window.clearTimeout(hideTimer.current)
-    setToastKey((k) => k + 1) // força remontagem do Toast e reinicia a animação
-    setShowError(true)
-    hideTimer.current = window.setTimeout(() => setShowError(false), TOAST_DURATION)
-  }
 
   useEffect(() => {
     if (flashError) {
       // Limpa a senha quando houver erro vindo do servidor (ex: credenciais inválidas)
       setData('password', '')
-      showErrorToast()
-    }
-    return () => {
-      if (hideTimer.current) window.clearTimeout(hideTimer.current)
+      toast.error(flashError)
     }
   }, [flashError])
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
-    setShowError(false)
 
     post('/login', {
       onError: () => {
         // Limpa a senha quando a submissão falhar (ex: validação 422)
         setData('password', '')
-        showErrorToast()
+        toast.error('Falha no login. Verifique suas credenciais.')
       },
     })
   }
@@ -51,16 +36,6 @@ export default function Login() {
 
       <div className="min-h-screen flex items-center justify-center bg-slate-800 p-6">
         <div className="w-full max-w-md rounded-3xl bg-gray-950 shadow-lg p-6 relative">
-          <Toast
-            key={toastKey}
-            show={showError}
-            type="error"
-            message={flashError || 'Falha no login. Verifique suas credenciais.'}
-            duration={TOAST_DURATION}
-            progressDirection="ltr"
-            onClose={() => setShowError(false)}
-          />
-
           <img
             className="mx-auto mb-6 w-36 h-28 object-contain rounded-none"
             src="/resources/imagens/logo-banco.png"

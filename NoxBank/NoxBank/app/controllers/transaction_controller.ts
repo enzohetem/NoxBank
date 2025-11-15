@@ -7,6 +7,8 @@ export default class TransactionController {
    */
   async index({ auth, inertia }: HttpContext) {
     const user = auth.user!
+    // Garante que o saldo refletirá o valor mais recente do banco
+    await user.refresh()
 
     // Busca todas as transações onde o usuário é sender ou receiver
     const transactions = await Transaction.query()
@@ -24,6 +26,8 @@ export default class TransactionController {
 
       return {
         id: transaction.id,
+        senderId: transaction.senderId,
+        receiverId: transaction.receiverId,
         name: otherUser?.fullName || 'Desconhecido',
         amount: transaction.amount,
         type: transaction.type,
@@ -35,6 +39,7 @@ export default class TransactionController {
 
     return inertia.render('extrato', {
       user: {
+        id: user.id,
         fullName: user.fullName,
         balance: Number(user.balance),
         account: `40028922-${user.id}`,

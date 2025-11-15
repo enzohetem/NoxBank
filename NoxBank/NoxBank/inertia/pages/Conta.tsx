@@ -1,4 +1,5 @@
 import { Head, router } from '@inertiajs/react'
+import LogoutButton from '../components/logout'
 
 interface ContaProps {
   user: {
@@ -29,18 +30,19 @@ export default function Conta({ user }: ContaProps) {
           <div className="bg-gray-900 rounded-2xl p-6 shadow-lg mb-6">
             <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm text-gray-300 mt-1">Olá, boas-vindas ao NoxBank!</p>
                 <h3 className="text-2xl font-bold font-inter text-white">
                   {user.fullName.toUpperCase()}
                 </h3>
-                <p className="text-sm text-gray-300 mt-1">
-                  Agência {user.agency} | Conta {user.account}
-                </p>
               </div>
-              <img
-                src="/resources/imagens/logo-banco.png"
-                className="w-24 h-16 object-contain"
-                alt="logo"
-              />
+              <div className="flex items-center gap-4">
+                <img
+                  src="/resources/imagens/logo-banco.png"
+                  className="w-24 h-16 object-contain"
+                  alt="logo"
+                />
+                <LogoutButton size="md" />
+              </div>
             </div>
           </div>
 
@@ -63,9 +65,6 @@ export default function Conta({ user }: ContaProps) {
                   <h2 className="text-4xl text-white font-bold mt-4">
                     {formatCurrency(user.balance)}
                   </h2>
-                  <button className="mt-4 px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-all duration-150 text-base text-white font-bold rounded-lg">
-                    Guardar na caixinha
-                  </button>
                 </div>
               </div>
 
@@ -130,11 +129,11 @@ export default function Conta({ user }: ContaProps) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">CPF</span>
-                    <span className="text-white font-medium">{user.cpf}</span>
+                    <span className="text-white font-medium">{`${user.cpf.slice(0, 3)}.***.***-**${user.cpf.slice(-2)}`}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Telefone</span>
-                    <span className="text-white font-medium">{user.phone}</span>
+                    <span className="text-white font-medium">{`${user.phone.slice(0, 3)}.***.***-**${user.phone.slice(-2)}`}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Agência</span>

@@ -1,3 +1,4 @@
+import { errors } from '@adonisjs/core'
 import app from '@adonisjs/core/services/app'
 import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import type { StatusPageRange, StatusPageRenderer } from '@adonisjs/core/types/http'
@@ -21,8 +22,15 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * to return the HTML contents to send as a response.
    */
   protected statusPages: Record<StatusPageRange, StatusPageRenderer> = {
-    '404': (error, { inertia }) => inertia.render('errors/not_found', { error }),
-    '500..599': (error, { inertia }) => inertia.render('errors/server_error', { error }),
+    // Usamos Inertia para páginas de erro padronizadas
+    '404': (error, { inertia, response }) => {
+      response.status(404)
+      return inertia.render('errors/notfound', { error })
+    },
+    '500..599': (error, { inertia, response }) => {
+      response.status(500)
+      return inertia.render('errors/server_error', { error })
+    },
   }
 
   /**
@@ -30,9 +38,14 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
+    // Rotas inexistentes: renderiza a página 404 via Inertia
+    if (error instanceof errors.E_ROUTE_NOT_FOUND) {
+      ctx.response.status(404)
+      return ctx.inertia.render('errors/notfound', { error })
+    }
+
     return super.handle(error, ctx)
   }
-
   /**
    * The method is used to report error to the logging service or
    * the a third party error monitoring service.
