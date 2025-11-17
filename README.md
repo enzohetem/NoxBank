@@ -1,4 +1,4 @@
-# Usabilidade-desenvolvimento-web-mobile-e-jogos
+# NoxBank
 Projeto acadêmico 6º semestre - Grupo 5
 
 Participantes do Time:
